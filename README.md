@@ -99,9 +99,8 @@ Available annotations (examples): `@VerifNowEmail`, `@VerifNowPhone`, `@VerifNow
 
 ## Quick try
 
-```markdown
 A runnable example (minimal Spring Boot app and test) is available in the public repository `jfiolleau/validation-java-example`: [https://github.com/jfiolleau/validation-java-example](https://github.com/jfiolleau/validation-java-example).
-```
+
 
 Try the integration in a few minutes inside an existing Spring Boot app:
 
