@@ -31,7 +31,7 @@ This Code of Conduct applies within all project spaces, and also applies in publ
 ## Enforcement
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting:
 
-📧 **verifnowio@gmail.com**
+📧 **support@verifnow.io**
 
 All complaints will be reviewed, investigated, and will result in a response deemed necessary and appropriate to the circumstances.
 

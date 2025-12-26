@@ -11,7 +11,7 @@ Instead, please follow the steps below.
 
 If you discover a potential security issue, please contact us at:
 
-📧 **verifnowio@gmail.com**
+📧 **support@verifnow.io**
 
 Please include as much detail as possible:
 - Description of the issue
@@ -40,7 +40,7 @@ Older versions may continue to function but are **not** guaranteed to receive pa
 
 ## Vulnerability Handling Process
 
-1. **Report received** via `verifnowio@gmail.com`
+1. **Report received** via `support@verifnow.io`
 2. **Initial review** and reproduction attempt
 3. **Classification** (severity and impact)
 4. **Fix development** and internal review
