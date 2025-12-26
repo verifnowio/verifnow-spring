@@ -1,0 +1,1 @@
+io.verifnow:verifnow-parent:pom:2.0.1

@@ -1,0 +1,8 @@
+
+The following files have been resolved:
+   jakarta.validation:jakarta.validation-api:jar:3.0.2:compile[36m -- module jakarta.validation[m
+
+
+The following files have been resolved:
+   jakarta.validation:jakarta.validation-api:jar:3.0.2:compile[36m -- module jakarta.validation[m
+

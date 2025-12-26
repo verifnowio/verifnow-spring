@@ -1,0 +1,2 @@
+io.verifnow:verifnow-core:jar:2.0.1
+\- jakarta.validation:jakarta.validation-api:jar:3.0.2:compile
