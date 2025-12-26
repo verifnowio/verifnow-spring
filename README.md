@@ -1,6 +1,6 @@
 # VerifNow Java SDK
 
-[![Build](https://github.com/jfiolleau/verifnow-spring/actions/workflows/ci.yml/badge.svg)](https://github.com/jfiolleau/verifnow-spring/actions/workflows/ci.yml)
+[![Build](https://github.com/verifnowio/verifnow-spring/actions/workflows/ci.yml/badge.svg)](https://github.com/verifnowio/verifnow-spring/actions/workflows/ci.yml)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.verifnow/verifnow-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.verifnow/verifnow-parent)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -99,7 +99,7 @@ Available annotations (examples): `@VerifNowEmail`, `@VerifNowPhone`, `@VerifNow
 
 ## Quick try
 
-A runnable example (minimal Spring Boot app and test) is available in the public repository `jfiolleau/validation-java-example`: [https://github.com/jfiolleau/validation-java-example](https://github.com/jfiolleau/validation-java-example).
+A runnable example (minimal Spring Boot app and test) is available in the public repository `verifnowio/validation-java-example`: [https://github.com/verifnowio/validation-java-example](https://github.com/verifnowio/validation-java-example).
 
 
 Try the integration in a few minutes inside an existing Spring Boot app:

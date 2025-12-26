@@ -25,6 +25,6 @@ Contributions are welcome — bug fixes, features, documentation, or feedback!
 Clone the repo:
 
 ```bash
-git clone https://github.com/jfiolleau/verifnow-spring.git
+git clone https://github.com/verifnowio/verifnow-spring.git
 cd verifnow-spring
 ```

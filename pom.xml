@@ -36,7 +36,7 @@
 
   <name>VerifNow Validation Library</name>
   <description>A Java validation library for remote validation services</description>
-  <url>https://github.com/jfiolleau/verifnow-spring</url>
+  <url>https://github.com/verifnowio/verifnow-spring</url>
 
   <licenses>
     <license>
@@ -55,9 +55,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/jfiolleau/verifnow-spring.git</connection>
-    <developerConnection>scm:git:ssh://github.com:jfiolleau/verifnow-spring.git</developerConnection>
-    <url>https://github.com/jfiolleau/verifnow-spring/tree/main</url>
+    <connection>scm:git:git://github.com/verifnowio/verifnow-spring.git</connection>
+    <developerConnection>scm:git:ssh://github.com:verifnowio/verifnow-spring.git</developerConnection>
+    <url>https://github.com/verifnowio/verifnow-spring/tree/main</url>
   </scm>
 
   <properties>
