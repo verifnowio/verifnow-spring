@@ -20,6 +20,8 @@ public class ValidationResult {
   private String normalizedValue;
   private String originalValue;
   private String message;
+  private String validationLevel;
+  private EmailDetails emailDetails;
 
   public ValidationResult() {}
 
@@ -59,5 +61,21 @@ public class ValidationResult {
 
   public void setOriginalValue(String originalValue) {
     this.originalValue = originalValue;
+  }
+
+  public String getValidationLevel() {
+    return validationLevel;
+  }
+
+  public void setValidationLevel(String validationLevel) {
+    this.validationLevel = validationLevel;
+  }
+
+  public EmailDetails getEmailDetails() {
+    return emailDetails;
+  }
+
+  public void setEmailDetails(EmailDetails emailDetails) {
+    this.emailDetails = emailDetails;
   }
 }

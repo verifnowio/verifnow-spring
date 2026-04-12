@@ -4,8 +4,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.verifnow/verifnow-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.verifnow/verifnow-parent)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-
-SDK Java officiel pour interagir avec l'API **VerifNow** : validation de données, vérification d'identité, et services de conformité.
+Official Java SDK for the **VerifNow** API — data validation, identity verification, and compliance services.
 
 ## Before you start
 
@@ -55,8 +54,8 @@ Notes:
 
 ## Modules
 
-- **verifnow-core**: Core validation functionality
-- **verifnow-spring**: Spring Framework integration
+- **verifnow-core**: Core validation functionality and API response models
+- **verifnow-spring**: Spring Framework integration with Jakarta Bean Validation annotations
 - **verifnow-spring-boot-starter**: Spring Boot auto-configuration starter
 
 
@@ -69,21 +68,22 @@ Notes:
 <dependency>
     <groupId>io.verifnow</groupId>
     <artifactId>verifnow-spring-boot-starter</artifactId>
-    <version>2.0.1</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation 'io.verifnow:verifnow-spring-boot-starter:2.0.0'
+implementation 'io.verifnow:verifnow-spring-boot-starter:2.1.0'
 ```
 
 ---
 ## Usage
 
+### Basic validation
+
 ```java
-@Entity
 public class User {
     @VerifNowEmail
     private String email;
@@ -95,12 +95,83 @@ public class User {
 }
 ```
 
-Available annotations (examples): `@VerifNowEmail`, `@VerifNowPhone`, `@VerifNowIban`, `@VerifNowVat`, `@VerifNowSsn`, `@VerifNowNas`, `@VerifNowNif`.
+Available annotations: `@VerifNowEmail`, `@VerifNowPhone`, `@VerifNowIban`, `@VerifNowVat`, `@VerifNowSsn`, `@VerifNowNas`, `@VerifNowNif`.
+
+### Advanced email validation
+
+Since **2.1.0**, `@VerifNowEmail` supports fine-grained control over email acceptance criteria using data returned by the VerifNow API (risk score, risk level, and deliverability status).
+
+All attributes are optional and default to permissive values, so `@VerifNowEmail` without parameters behaves exactly as before.
+
+```java
+import io.verifnow.core.client.Deliverability;
+import io.verifnow.core.client.RiskLevel;
+import io.verifnow.spring.annotations.VerifNowEmail;
+
+public class StrictUser {
+
+    // Reject emails with a risk score above 30 (0–100 scale, 0 = lowest risk)
+    @VerifNowEmail(maxRiskScore = 30)
+    private String email;
+
+    // Accept only LOW and MEDIUM risk levels (reject HIGH)
+    @VerifNowEmail(maxRiskLevel = RiskLevel.MEDIUM)
+    private String safeEmail;
+
+    // Only allow emails confirmed as deliverable
+    @VerifNowEmail(allowedDeliverabilities = { Deliverability.DELIVERABLE })
+    private String deliverableEmail;
+
+    // Combine multiple criteria
+    @VerifNowEmail(
+        maxRiskScore = 50,
+        maxRiskLevel = RiskLevel.MEDIUM,
+        allowedDeliverabilities = { Deliverability.DELIVERABLE, Deliverability.RISKY }
+    )
+    private String businessEmail;
+}
+```
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `maxRiskScore` | `int` | `100` | Maximum acceptable risk score (0–100). Validation fails if the score exceeds this value. |
+| `maxRiskLevel` | `RiskLevel` | `HIGH` | Maximum acceptable risk level. Order: `LOW` < `MEDIUM` < `HIGH`. |
+| `allowedDeliverabilities` | `Deliverability[]` | `{}` (all) | If non-empty, only the listed statuses are accepted: `DELIVERABLE`, `RISKY`, `UNDELIVERABLE`, `UNKNOWN`. |
+
+### Error messages
+
+Each failure reason produces a specific, human-readable error message with contextual parameters:
+
+| Failure | Message example |
+|---|---|
+| API says invalid | `Invalid email address` |
+| Risk score exceeded | `Email rejected: risk score 75 exceeds the maximum allowed (30)` |
+| Risk level exceeded | `Email rejected: risk level HIGH exceeds the maximum allowed (MEDIUM)` |
+| Deliverability rejected | `Email rejected: deliverability RISKY is not in the allowed list (DELIVERABLE)` |
+
+Default messages are bundled with the library and resolved automatically by Hibernate Validator.
+
+To override them globally, define the keys in your application's `ValidationMessages.properties`:
+
+```properties
+validation.verifnow.email.invalid=Custom invalid email message
+validation.verifnow.email.risk_score.exceeded=Risk score {riskScore} is too high (max: {maxRiskScore})
+validation.verifnow.email.risk_level.exceeded=Risk level {riskLevel} is not acceptable (max: {maxRiskLevel})
+validation.verifnow.email.deliverability.rejected=Deliverability {deliverability} not allowed (accepted: {allowedDeliverabilities})
+```
+
+You can also override per-annotation using the `message` attribute:
+
+```java
+@VerifNowEmail(maxRiskScore = 30, message = "This email does not meet our quality standards")
+private String email;
+```
+
+---
 
 ## Quick try
 
 A runnable example (minimal Spring Boot app and test) is available in the public repository `verifnowio/validation-java-example`: [https://github.com/verifnowio/validation-java-example](https://github.com/verifnowio/validation-java-example).
-
 
 Try the integration in a few minutes inside an existing Spring Boot app:
 

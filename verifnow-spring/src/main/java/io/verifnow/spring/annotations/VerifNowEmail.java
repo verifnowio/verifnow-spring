@@ -20,6 +20,8 @@ import jakarta.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import io.verifnow.core.client.Deliverability;
+import io.verifnow.core.client.RiskLevel;
 import io.verifnow.spring.validators.VerifNowEmailValidator;
 
 import static java.lang.annotation.ElementType.FIELD;
@@ -36,4 +38,26 @@ public @interface VerifNowEmail {
   Class<? extends Payload>[] payload() default {};
   String profile() default "";
   boolean allowNull() default true;
+
+  /**
+   * Maximum acceptable risk score (0–100). Validation fails if the
+   * API returns a risk score strictly greater than this value.
+   * Default is {@code 100} (no restriction).
+   */
+  int maxRiskScore() default 100;
+
+  /**
+   * Maximum acceptable risk level. Validation fails if the API returns
+   * a risk level strictly higher than this value.
+   * Order: LOW &lt; MEDIUM &lt; HIGH.
+   * Default is {@link RiskLevel#HIGH} (no restriction).
+   */
+  RiskLevel maxRiskLevel() default RiskLevel.HIGH;
+
+  /**
+   * Allowed deliverability statuses. If non-empty, validation fails when
+   * the API returns a deliverability status not in this list.
+   * Default is empty (no restriction — all statuses accepted).
+   */
+  Deliverability[] allowedDeliverabilities() default {};
 }
