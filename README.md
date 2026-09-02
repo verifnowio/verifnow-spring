@@ -29,7 +29,7 @@ Example with `application.yml`:
 verifnow:
   api:
     apiKey: "YOUR_API_KEY"           # required to call the VerifNow API
-    # baseUrl: https://api.verifnow.com # default
+    # baseUrl: https://api.verifnow.io  # default
     # timeoutMs: 1500                  # default
     # cacheEnabled: true               # default
     # cacheTtlSeconds: 60              # default
@@ -40,7 +40,7 @@ Or with `application.properties`:
 
 ```properties
 verifnow.api.apiKey=YOUR_API_KEY
-# verifnow.api.baseUrl=https://api.verifnow.com
+# verifnow.api.baseUrl=https://api.verifnow.io
 # verifnow.api.timeoutMs=1500
 # verifnow.api.cacheEnabled=true
 # verifnow.api.cacheTtlSeconds=60
@@ -50,7 +50,7 @@ verifnow.api.apiKey=YOUR_API_KEY
 Notes:
 - `apiKey` is required. Without a valid key, API calls will fail.
 - `failOnError=false` is fail-open by default if the API/network errors out. Set to `true` to strictly fail validation on errors.
-- `baseUrl` defaults to `https://api.verifnow.com`.
+- `baseUrl` defaults to `https://api.verifnow.io`.
 
 ## Modules
 
@@ -68,14 +68,14 @@ Notes:
 <dependency>
     <groupId>io.verifnow</groupId>
     <artifactId>verifnow-spring-boot-starter</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation 'io.verifnow:verifnow-spring-boot-starter:2.1.0'
+implementation 'io.verifnow:verifnow-spring-boot-starter:2.1.1'
 ```
 
 ---
