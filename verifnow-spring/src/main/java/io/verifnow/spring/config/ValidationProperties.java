@@ -21,11 +21,27 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "verifnow.api")
 public class ValidationProperties {
 
-  private String baseUrl = "https://api.verifnow.com";
+  /**
+   * Origin of the VerifNow API.
+   *
+   * <p>Must stay {@code api.verifnow.io}. Until 2.1.1 this defaulted to {@code api.verifnow.com},
+   * a host that has no DNS record at all — so every call failed to connect and, with
+   * {@link #failOnError} defaulting to {@code false}, was silently reported as valid.
+   */
+  private String baseUrl = "https://api.verifnow.io";
   private int timeoutMs = 1500;
   private String apiKey;
   private boolean cacheEnabled = true;
   private long cacheTtlSeconds = 60;
+
+  /**
+   * How to behave when the API cannot be reached.
+   *
+   * <p>{@code false} (the default) fails open: the value is accepted without being verified so a
+   * VerifNow outage never blocks your own signups. That trade-off is deliberate, but it means an
+   * outage is invisible in your data — every failed call is now logged at WARN so it is visible in
+   * yours. Set to {@code true} to reject instead.
+   */
   private boolean failOnError = false;
 
   public String getBaseUrl() {
