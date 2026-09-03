@@ -166,10 +166,15 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.6.0</version>
+        <version>0.11.0</version>
         <extensions>true</extensions>
         <configuration>
-          <serverId>central</serverId>
+          <!-- Matches the <server><id> in settings.xml holding the Central Portal user token.
+               Renamed from <serverId> in 0.7.0; the old name is rejected outright. -->
+          <publishingServerId>central</publishingServerId>
+          <!-- Upload and validate only. The deployment waits in the Portal until you press
+               Publish, so a bad bundle can still be dropped instead of released forever. -->
+          <autoPublish>false</autoPublish>
         </configuration>
       </plugin>
       <plugin>
