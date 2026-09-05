@@ -34,12 +34,39 @@ was validated.
 ```bash
 ./mvnw clean test        # unit tests, no network
 ./mvnw clean install     # local install for testing against a sample app
-./mvnw clean deploy -P release   # signs and publishes to Central — release only
+./mvnw clean deploy -P release   # signs and publishes to Central — prefer the workflow below
 ```
 
 Publishing uses `central-publishing-maven-plugin` **0.11.0**. Version 0.6.0 breaks on a field the
 Sonatype portal now returns; the upgrade also renamed a parameter, so bumping the version alone is
 not enough.
+
+## CI and release workflows
+
+Three workflows, recovered from the repository this SDK was extracted from (`validation-spring`,
+whose remote no longer exists) and adapted:
+
+- **`ci.yml`** — build and tests on `main` / `develop` and their PRs.
+- **`deploy.yml`** — *Deploy to Maven Central*. Runs on a `v*.*.*` tag, or on demand: it strips
+  `-SNAPSHOT`, deploys, tags, publishes a GitHub release with the three jars, then bumps to the next
+  patch snapshot. This is the release path — prefer it over deploying from a laptop, which is how
+  an unsigned or half-configured artifact reaches Central.
+- **`security.yml`** — OWASP dependency-check and Snyk, **weekly and on demand only**. It is
+  deliberately off the push and PR paths: dependency-check downloads the NVD database, which takes
+  hours without an API key and stalls every review behind a scan whose result rarely changes
+  between two commits. That mistake cost days of CI time in `validAPI` before the scan was moved to
+  a schedule there.
+
+Two files from the old repository were **not** brought over, on purpose: a `settings.xml` and a
+`DEPLOYMENT_GUIDE.md` that both describe the OSSRH portal. This project publishes through the
+Central Portal via `central-publishing-maven-plugin`, no workflow referenced that settings file, and
+following the old guide would send you to configure credentials the release path does not read.
+
+**Required secrets** (on the `verifnowio/verifnow-spring` repository or the organisation):
+`CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE` for publishing;
+`NVD_API_KEY` to keep the security scan from crawling; `SNYK_TOKEN` (its step tolerates failure).
+A release fails late and confusingly when one of the first four is missing — check them before
+tagging.
 
 ## Conventions
 
