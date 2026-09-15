@@ -16,6 +16,8 @@
 package io.verifnow.spring.validators;
 
 import io.verifnow.core.client.VerifNowClient;
+import io.verifnow.core.client.PhoneDetails;
+import io.verifnow.core.client.PhoneLineType;
 import io.verifnow.core.client.ValidationResult;
 import io.verifnow.spring.annotations.VerifNowPhone;
 import jakarta.validation.ConstraintValidator;
@@ -23,10 +25,16 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
+
 @Component
 public class VerifNowPhoneValidator implements ConstraintValidator<VerifNowPhone, String> {
   private final VerifNowClient apiClient;
   private boolean allowNull = true;
+  private Set<PhoneLineType> rejectedLineTypes = EnumSet.noneOf(PhoneLineType.class);
 
   @Autowired
   public VerifNowPhoneValidator(VerifNowClient apiClient) {
@@ -36,6 +44,10 @@ public class VerifNowPhoneValidator implements ConstraintValidator<VerifNowPhone
   @Override
   public void initialize(VerifNowPhone constraintAnnotation) {
     this.allowNull = constraintAnnotation.allowNull();
+    PhoneLineType[] rejected = constraintAnnotation.rejectedLineTypes();
+    if (rejected.length > 0) {
+      this.rejectedLineTypes = EnumSet.copyOf(Arrays.asList(rejected));
+    }
   }
 
   @Override
@@ -43,7 +55,15 @@ public class VerifNowPhoneValidator implements ConstraintValidator<VerifNowPhone
     if (value == null) return allowNull;
     try {
       ValidationResult r = apiClient.validate("phone", value);
-      return r != null && r.isValid();
+      if (r == null || !r.isValid()) return false;
+
+      PhoneDetails details = r.getPhoneDetails();
+      if (details != null && details.lineType() != null
+          && rejectedLineTypes.contains(details.lineType())) {
+        return Violations.add(context, "{validation.verifnow.phone.line_type.rejected}",
+            Map.of("lineType", details.lineType().name()));
+      }
+      return true;
     } catch (Exception ex) {
       return false;
     }

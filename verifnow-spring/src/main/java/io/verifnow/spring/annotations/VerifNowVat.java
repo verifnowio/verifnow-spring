@@ -36,4 +36,17 @@ public @interface VerifNowVat {
   Class<? extends Payload>[] payload() default {};
   String profile() default "";
   boolean allowNull() default true;
+
+  /**
+   * Reject a number whose registration VIES could not confirm.
+   *
+   * <p>Off by default, and deliberately so. When VIES is unreachable for a member state — which
+   * happens several times a month — the API reports the registration as unknown and still marks a
+   * well-formed number valid. Turning this on rejects legitimate businesses during those outages;
+   * do it only where an unconfirmed registration is genuinely unacceptable, and prefer re-checking
+   * later when you can.
+   *
+   * @since 2.2.0
+   */
+  boolean requireRegistered() default false;
 }

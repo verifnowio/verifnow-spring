@@ -17,17 +17,21 @@ package io.verifnow.spring.validators;
 
 import io.verifnow.core.client.VerifNowClient;
 import io.verifnow.core.client.ValidationResult;
+import io.verifnow.core.client.VatDetails;
 import io.verifnow.spring.annotations.VerifNowVat;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 public class VerifNowVatValidator implements ConstraintValidator<VerifNowVat, String> {
 
   private final VerifNowClient apiClient;
   private boolean allowNull = true;
+  private boolean requireRegistered = false;
 
   @Autowired
   public VerifNowVatValidator(VerifNowClient apiClient) {
@@ -37,6 +41,7 @@ public class VerifNowVatValidator implements ConstraintValidator<VerifNowVat, St
   @Override
   public void initialize(VerifNowVat constraintAnnotation) {
     this.allowNull = constraintAnnotation.allowNull();
+    this.requireRegistered = constraintAnnotation.requireRegistered();
   }
 
   @Override
@@ -44,7 +49,18 @@ public class VerifNowVatValidator implements ConstraintValidator<VerifNowVat, St
     if (value == null) return allowNull;
     try {
       ValidationResult r = apiClient.validate("vat", value);
-      return r != null && r.isValid();
+      if (r == null || !r.isValid()) return false;
+
+      if (requireRegistered) {
+        VatDetails details = r.getVatDetails();
+        if (details == null || !Boolean.TRUE.equals(details.registered())) {
+          String source = details == null || details.source() == null
+              ? "UNKNOWN" : details.source().name();
+          return Violations.add(context,
+              "{validation.verifnow.vat.registration.unconfirmed}", Map.of("source", source));
+        }
+      }
+      return true;
     } catch (Exception ex) {
       return false;
     }

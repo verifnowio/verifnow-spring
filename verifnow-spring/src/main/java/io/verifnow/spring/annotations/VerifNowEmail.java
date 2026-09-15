@@ -60,4 +60,20 @@ public @interface VerifNowEmail {
    * Default is empty (no restriction — all statuses accepted).
    */
   Deliverability[] allowedDeliverabilities() default {};
+
+  /**
+   * Reject addresses at a disposable mailbox provider. Default {@code false}. The signal is
+   * returned on every plan.
+   *
+   * @since 2.2.0
+   */
+  boolean rejectDisposable() default false;
+
+  /**
+   * Reject shared mailboxes such as {@code info@} or {@code contact@}. Default {@code false}: on a
+   * B2B form, {@code contact@} is often the only address a small company has.
+   *
+   * @since 2.2.0
+   */
+  boolean rejectRoleBased() default false;
 }

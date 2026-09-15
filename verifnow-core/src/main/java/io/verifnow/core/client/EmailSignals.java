@@ -16,6 +16,8 @@
 package io.verifnow.core.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import java.util.Optional;
 
 /**
  * Detailed signal data returned by the VerifNow email validation API.
@@ -31,13 +33,20 @@ public class EmailSignals {
   @JsonProperty("typo_detected")
   private boolean typoDetected;
 
+  @JsonProperty("suggested_domain")
+  private String suggestedDomain;
+
   private boolean disposable;
 
   @JsonProperty("role_based")
   private boolean roleBased;
 
+  // Boxed: the API omits this field below ADVANCED depth, and a primitive would read that as false.
   @JsonProperty("free_provider")
-  private boolean freeProvider;
+  private Boolean freeProvider;
+
+  @JsonProperty("domain_age_days")
+  private Integer domainAgeDays;
 
   @JsonProperty("mx_provider")
   private String mxProvider;
@@ -87,12 +96,61 @@ public class EmailSignals {
     this.roleBased = roleBased;
   }
 
+  /**
+   * Whether the domain is a consumer mailbox provider.
+   *
+   * <p>Returns {@code false} when the signal was not computed, which happens on the FREE and
+   * STARTER plans. Use {@link #freeProviderIfComputed()} to tell the two apart.
+   */
   public boolean isFreeProvider() {
-    return freeProvider;
+    return Boolean.TRUE.equals(freeProvider);
   }
 
   public void setFreeProvider(boolean freeProvider) {
     this.freeProvider = freeProvider;
+  }
+
+  // Jackson's entry point for free_provider. The public setter takes a primitive, so an explicit
+  // JSON null would reach it as false and erase the difference between "no" and "not computed".
+  @JsonSetter("free_provider")
+  private void readFreeProvider(Boolean freeProvider) {
+    this.freeProvider = freeProvider;
+  }
+
+  /**
+   * The free-provider signal, or empty when the applied validation level did not compute it
+   * (below ADVANCED, i.e. FREE and STARTER). Empty is not "not a free provider".
+   *
+   * @since 2.2.0
+   */
+  public Optional<Boolean> freeProviderIfComputed() {
+    return Optional.ofNullable(freeProvider);
+  }
+
+  /**
+   * The corrected domain proposed when {@link #isTypoDetected()} is true, e.g. {@code gmail.com}.
+   *
+   * @since 2.2.0
+   */
+  public String getSuggestedDomain() {
+    return suggestedDomain;
+  }
+
+  public void setSuggestedDomain(String suggestedDomain) {
+    this.suggestedDomain = suggestedDomain;
+  }
+
+  /**
+   * Estimated age of the domain in days, or {@code null} below ADVANCED depth.
+   *
+   * @since 2.2.0
+   */
+  public Integer getDomainAgeDays() {
+    return domainAgeDays;
+  }
+
+  public void setDomainAgeDays(Integer domainAgeDays) {
+    this.domainAgeDays = domainAgeDays;
   }
 
   public String getMxProvider() {

@@ -17,13 +17,13 @@ package io.verifnow.spring.validators;
 
 import io.verifnow.core.client.Deliverability;
 import io.verifnow.core.client.EmailDetails;
+import io.verifnow.core.client.EmailSignals;
 import io.verifnow.core.client.RiskLevel;
 import io.verifnow.core.client.VerifNowClient;
 import io.verifnow.core.client.ValidationResult;
 import io.verifnow.spring.annotations.VerifNowEmail;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +40,8 @@ public class VerifNowEmailValidator implements ConstraintValidator<VerifNowEmail
   private int maxRiskScore = 100;
   private RiskLevel maxRiskLevel = RiskLevel.HIGH;
   private Set<Deliverability> allowedDeliverabilities = EnumSet.noneOf(Deliverability.class);
+  private boolean rejectDisposable = false;
+  private boolean rejectRoleBased = false;
 
   @Autowired
   public VerifNowEmailValidator(VerifNowClient apiClient) {
@@ -51,6 +53,8 @@ public class VerifNowEmailValidator implements ConstraintValidator<VerifNowEmail
     this.allowNull = constraintAnnotation.allowNull();
     this.maxRiskScore = constraintAnnotation.maxRiskScore();
     this.maxRiskLevel = constraintAnnotation.maxRiskLevel();
+    this.rejectDisposable = constraintAnnotation.rejectDisposable();
+    this.rejectRoleBased = constraintAnnotation.rejectRoleBased();
 
     Deliverability[] deliverabilities = constraintAnnotation.allowedDeliverabilities();
     if (deliverabilities.length > 0) {
@@ -68,6 +72,14 @@ public class VerifNowEmailValidator implements ConstraintValidator<VerifNowEmail
       EmailDetails details = r.getEmailDetails();
       // No email details available — fall back to the basic valid flag
       if (details == null) return true;
+
+      EmailSignals signals = details.getSignals();
+      if (rejectDisposable && signals != null && signals.isDisposable()) {
+        return addViolation(context, "{validation.verifnow.email.disposable.rejected}", Map.of());
+      }
+      if (rejectRoleBased && signals != null && signals.isRoleBased()) {
+        return addViolation(context, "{validation.verifnow.email.role_based.rejected}", Map.of());
+      }
 
       // Risk score check (0 = lowest risk, 100 = highest)
       if (details.getRiskScore() > maxRiskScore) {
@@ -105,28 +117,8 @@ public class VerifNowEmailValidator implements ConstraintValidator<VerifNowEmail
     }
   }
 
-  /**
-   * Replaces the default violation with a specific message template and
-   * injects runtime parameters via Hibernate Validator's extended API.
-   * Falls back to the standard Jakarta API (template only, no parameters)
-   * if Hibernate Validator is not on the classpath.
-   *
-   * @return always {@code false} — for use as {@code return addViolation(…);}
-   */
   private boolean addViolation(ConstraintValidatorContext context,
                                String template, Map<String, Object> params) {
-    context.disableDefaultConstraintViolation();
-    try {
-      HibernateConstraintValidatorContext hvContext =
-          context.unwrap(HibernateConstraintValidatorContext.class);
-      params.forEach(hvContext::addMessageParameter);
-      hvContext.buildConstraintViolationWithTemplate(template)
-          .addConstraintViolation();
-    } catch (Exception e) {
-      // Hibernate Validator not available — use template without parameters
-      context.buildConstraintViolationWithTemplate(template)
-          .addConstraintViolation();
-    }
-    return false;
+    return Violations.add(context, template, params);
   }
 }

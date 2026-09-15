@@ -68,14 +68,14 @@ Notes:
 <dependency>
     <groupId>io.verifnow</groupId>
     <artifactId>verifnow-spring-boot-starter</artifactId>
-    <version>2.1.1</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation 'io.verifnow:verifnow-spring-boot-starter:2.1.1'
+implementation 'io.verifnow:verifnow-spring-boot-starter:2.2.0'
 ```
 
 ---
@@ -137,6 +137,56 @@ public class StrictUser {
 | `maxRiskScore` | `int` | `100` | Maximum acceptable risk score (0–100). Validation fails if the score exceeds this value. |
 | `maxRiskLevel` | `RiskLevel` | `HIGH` | Maximum acceptable risk level. Order: `LOW` < `MEDIUM` < `HIGH`. |
 | `allowedDeliverabilities` | `Deliverability[]` | `{}` (all) | If non-empty, only the listed statuses are accepted: `DELIVERABLE`, `RISKY`, `UNDELIVERABLE`, `UNKNOWN`. |
+
+### VAT, phone and email options (2.2.0)
+
+All three default to accepting, so existing annotations behave as before.
+
+```java
+import io.verifnow.core.client.PhoneLineType;
+
+public class B2bSignup {
+
+    // Accepted by default when VIES is down for that member state: the number is well formed
+    // and its registration is unknown, not absent. requireRegistered rejects that case too.
+    @VerifNowVat
+    private String vatNumber;
+
+    // Every valid number passes unless its line type is listed. Numbers need a country code.
+    @VerifNowPhone(rejectedLineTypes = { PhoneLineType.PREMIUM_RATE })
+    private String phone;
+
+    // contact@ and info@ are accepted unless rejectRoleBased = true.
+    @VerifNowEmail(rejectDisposable = true)
+    private String email;
+}
+```
+
+| Annotation | Attribute | Default | Effect |
+|---|---|---|---|
+| `@VerifNowVat` | `requireRegistered` | `false` | Also reject when VIES could not confirm the registration. Rejects real businesses during VIES outages — use sparingly. |
+| `@VerifNowPhone` | `rejectedLineTypes` | `{}` | Reject valid numbers of these types, e.g. `PREMIUM_RATE`. |
+| `@VerifNowEmail` | `rejectDisposable` | `false` | Reject disposable mailbox providers. |
+| `@VerifNowEmail` | `rejectRoleBased` | `false` | Reject shared mailboxes such as `info@`, `contact@`. |
+
+### Reading the diagnostics
+
+`ValidationResult` carries the details behind each verdict:
+
+```java
+ValidationResult vat = client.validate("vat", "IE6388047V");
+VatDetails details = vat.getVatDetails();
+Boolean registered = details.registered();   // null = VIES could not be asked, never "no"
+VatSource source = details.source();          // LIVE, CACHE, STALE, UNVERIFIED, NOT_APPLICABLE
+String receipt = details.consultationNumber(); // when your account has a VAT number configured
+
+ValidationResult phone = client.validate("phone", "+33 6 12 34 56 78");
+phone.getNormalizedValue();                    // "+33612345678" (E.164)
+phone.getPhoneDetails().lineType();            // MOBILE
+
+EmailSignals signals = client.validate("email", "someone@gmail.com").getEmailDetails().getSignals();
+signals.freeProviderIfComputed();              // Optional.empty() on FREE and STARTER
+```
 
 ### Error messages
 

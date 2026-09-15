@@ -3,7 +3,7 @@
 Guidance for Claude Code (claude.ai/code) when working in this repository.
 
 Published to **Maven Central** as `io.verifnow:verifnow-spring` (and siblings). Current version:
-`2.1.1`. The repository lives under the `verifnowio` GitHub organisation — an older, unrelated
+`2.2.0`. The repository lives under the `verifnowio` GitHub organisation — an older, unrelated
 `validation-spring` repo under the personal account is dead and must not be used.
 
 ## Modules

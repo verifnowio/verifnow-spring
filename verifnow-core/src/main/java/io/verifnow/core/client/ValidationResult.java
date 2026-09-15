@@ -22,6 +22,8 @@ public class ValidationResult {
   private String message;
   private String validationLevel;
   private EmailDetails emailDetails;
+  private VatDetails vatDetails;
+  private PhoneDetails phoneDetails;
 
   public ValidationResult() {}
 
@@ -77,5 +79,32 @@ public class ValidationResult {
 
   public void setEmailDetails(EmailDetails emailDetails) {
     this.emailDetails = emailDetails;
+  }
+
+  /**
+   * VAT diagnostics, present on {@code vat} validations. Read {@link VatDetails#registered()}
+   * rather than {@link #isValid()} when an unconfirmed registration must not be accepted.
+   *
+   * @since 2.2.0
+   */
+  public VatDetails getVatDetails() {
+    return vatDetails;
+  }
+
+  public void setVatDetails(VatDetails vatDetails) {
+    this.vatDetails = vatDetails;
+  }
+
+  /**
+   * Phone diagnostics — country, line type and formats — present on {@code phone} validations.
+   *
+   * @since 2.2.0
+   */
+  public PhoneDetails getPhoneDetails() {
+    return phoneDetails;
+  }
+
+  public void setPhoneDetails(PhoneDetails phoneDetails) {
+    this.phoneDetails = phoneDetails;
   }
 }

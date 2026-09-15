@@ -17,6 +17,7 @@ package io.verifnow.spring.annotations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import io.verifnow.core.client.PhoneLineType;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -36,4 +37,12 @@ public @interface VerifNowPhone {
   Class<? extends Payload>[] payload() default {};
   String profile() default "";
   boolean allowNull() default true;
+
+  /**
+   * Line types to reject even though the number is valid, e.g. {@code PREMIUM_RATE}. Default is
+   * empty: every valid number is accepted.
+   *
+   * @since 2.2.0
+   */
+  PhoneLineType[] rejectedLineTypes() default {};
 }

@@ -6,6 +6,30 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.2.0] - 2026-09-15
+### Added
+- **`VatDetails`** on `ValidationResult#getVatDetails()`: `formatValid`, `registered`, `countryCode`,
+  `source` (`VatSource`), `checkedAt`, trader name and address, `viesAvailable`, and
+  `consultationNumber` — the receipt VIES issues when your account has a VAT number configured.
+  `registered` is a nullable `Boolean`: `null` means VIES could not be consulted, never "not
+  registered".
+- **`PhoneDetails`** on `ValidationResult#getPhoneDetails()`: `countryCode`, `callingCode`,
+  `lineType` (`PhoneLineType`), international and national formats. The API now validates phone
+  numbers against each country's numbering plan and requires a country code.
+- `EmailSignals#getSuggestedDomain()`, `#getDomainAgeDays()` and `#freeProviderIfComputed()`.
+- `@VerifNowVat(requireRegistered)`, `@VerifNowPhone(rejectedLineTypes)`,
+  `@VerifNowEmail(rejectDisposable, rejectRoleBased)`, each with its own default message. All
+  default to accepting, so existing annotations are unaffected.
+
+### Fixed
+- `EmailSignals#isFreeProvider()` was a primitive, so on FREE and STARTER — where the API does not
+  compute the signal and omits the field — it read as `false`, indistinguishable from "not a free
+  provider". The getter keeps its signature; `freeProviderIfComputed()` returns empty in that case.
+- Unknown `VatSource` or `PhoneLineType` values sent by a newer API no longer make the response
+  unreadable. With `failOnError=false`, an unreadable response used to be accepted unverified.
+
+---
+
 ## [2.1.1] - 2026-09-02
 ### Fixed
 - **The default `baseUrl` pointed at a host that does not exist.** Releases up to 2.1.0 defaulted
