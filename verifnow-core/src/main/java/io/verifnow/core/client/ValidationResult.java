@@ -24,6 +24,7 @@ public class ValidationResult {
   private EmailDetails emailDetails;
   private VatDetails vatDetails;
   private PhoneDetails phoneDetails;
+  private IbanDetails ibanDetails;
 
   public ValidationResult() {}
 
@@ -106,5 +107,19 @@ public class ValidationResult {
 
   public void setPhoneDetails(PhoneDetails phoneDetails) {
     this.phoneDetails = phoneDetails;
+  }
+
+  /**
+   * IBAN diagnostics, present on {@code iban} validations. Read {@link IbanDetails#structureValid()}
+   * and {@link IbanDetails#checksumValid()} to tell an impossible account number from a typo.
+   *
+   * @since 2.3.0
+   */
+  public IbanDetails getIbanDetails() {
+    return ibanDetails;
+  }
+
+  public void setIbanDetails(IbanDetails ibanDetails) {
+    this.ibanDetails = ibanDetails;
   }
 }

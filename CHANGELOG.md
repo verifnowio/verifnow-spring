@@ -6,6 +6,16 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.3.0] - 2026-09-16
+### Added
+- **`IbanDetails`** on `ValidationResult#getIbanDetails()`: `countryCode`, `structureValid`,
+  `checksumValid`, `length`, `expectedLength` and `formatted`. The API now checks an IBAN against
+  the SWIFT registry entry for its country — length and character layout — as well as its mod-97
+  check digits, and reports the two separately. Valid check digits on an impossible length (a
+  25-character French IBAN, say) used to be accepted as valid.
+
+---
+
 ## [2.2.0] - 2026-09-15
 ### Added
 - **`VatDetails`** on `ValidationResult#getVatDetails()`: `formatValid`, `registered`, `countryCode`,

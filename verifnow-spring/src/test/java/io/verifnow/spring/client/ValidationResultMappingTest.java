@@ -98,6 +98,25 @@ class ValidationResultMappingTest {
   }
 
   @Test
+  void mapsIbanDetailsKeepingStructureAndChecksumApart() {
+    // Valid check digits on an impossible length: the case the old validator called valid.
+    ValidationResult result = respond("iban", """
+        {"valid":false,"message":"A FR IBAN is 27 characters long",
+         "originalValue":"FR23111111111111111111111","validationLevel":"STANDARD",
+         "ibanDetails":{"country_code":"FR","structure_valid":false,"checksum_valid":true,
+           "length":25,"expected_length":27}}""");
+
+    var iban = result.getIbanDetails();
+    assertThat(result.isValid()).isFalse();
+    assertThat(iban.checksumValid()).isTrue();
+    assertThat(iban.structureValid()).isFalse();
+    assertThat(iban.countryCode()).isEqualTo("FR");
+    assertThat(iban.length()).isEqualTo(25);
+    assertThat(iban.expectedLength()).isEqualTo(27);
+    assertThat(iban.formatted()).isNull();
+  }
+
+  @Test
   void mapsPhoneDetails() {
     ValidationResult result = respond("phone", """
         {"valid":true,"normalizedValue":"+33612345678","originalValue":"+33 6 12 34 56 78",
