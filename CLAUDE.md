@@ -78,7 +78,7 @@ tagging.
 
 ## Conventions
 
-- Java 17+, Spring Boot 3.x (parent `3.5.13`).
+- Java 17+, Spring Boot 3.x (parent `3.5.16`).
 - Every source file carries the license header (`LICENSE_HEADER`, enforced by `license-maven-plugin`).
 - Public API is a published contract: additive changes only, semver strictly. Someone else's build
   depends on this.
