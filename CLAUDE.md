@@ -51,7 +51,11 @@ whose remote no longer exists) and adapted:
   `-SNAPSHOT`, deploys, tags, publishes a GitHub release with the three jars, then bumps to the next
   patch snapshot. This is the release path — prefer it over deploying from a laptop, which is how
   an unsigned or half-configured artifact reaches Central.
-- **`security.yml`** — OWASP dependency-check and Snyk, **weekly and on demand only**. It is
+- **`security.yml`** — OWASP dependency-check and Snyk, **weekly and on demand only**. The
+  dependency-check plugin is configured in the parent POM but deliberately **left unbound to any
+  phase**: bound to `verify` it ran inside `mvn clean verify` (every CI build) and inside
+  `mvn clean deploy` (every release), where a CVSS >= 7 finding in a transitive dependency fails
+  the release itself. The workflow calls the goal directly. It is
   deliberately off the push and PR paths: dependency-check downloads the NVD database, which takes
   hours without an API key and stalls every review behind a scan whose result rarely changes
   between two commits. That mistake cost days of CI time in `validAPI` before the scan was moved to
@@ -65,6 +69,10 @@ following the old guide would send you to configure credentials the release path
 **Required secrets** (on the `verifnowio/verifnow-spring` repository or the organisation):
 `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE` for publishing;
 `NVD_API_KEY` to keep the security scan from crawling; `SNYK_TOKEN` (its step tolerates failure).
+**Neither of the last two is set today**, so `security.yml` skips both scans and says so in a
+warning annotation rather than crawling the NVD feed for 45 minutes. A free key is issued in
+minutes at <https://nvd.nist.gov/developers/request-an-api-key>; adding it as a repository secret
+is all it takes to turn the weekly scan back on.
 A release fails late and confusingly when one of the first four is missing — check them before
 tagging.
 

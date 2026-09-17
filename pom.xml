@@ -211,24 +211,23 @@
           </execution>
         </executions>
       </plugin>
+      <!--
+        Configured, but deliberately NOT bound to a lifecycle phase. Bound to `verify` it ran on
+        every `mvn clean verify` — so on every CI build, and on every `mvn clean deploy` in the
+        release workflow, where a CVSS >= 7 finding in a transitive dependency would fail the
+        release itself. It also downloads the NVD database, which takes hours without an API key.
+        The weekly `security.yml` workflow invokes the goal directly:
+          mvn org.owasp:dependency-check-maven:check
+      -->
       <plugin>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-maven</artifactId>
         <!-- version is provided by pluginManagement -->
-        <executions>
-          <execution>
-            <id>dependency-check</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
           <nvdApiKey>${nvd.api.key}</nvdApiKey>
-          <ossIndex>
-            <enabled>false</enabled>
-          </ossIndex>
+          <!-- `ossIndex` was not a parameter of this plugin: it was silently ignored, so the OSS
+               Index analyzer it meant to disable was running anyway. -->
+          <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
         </configuration>
       </plugin>
     </plugins>

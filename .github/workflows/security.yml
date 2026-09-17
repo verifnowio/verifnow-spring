@@ -13,6 +13,16 @@ on:
 jobs:
   security-scan:
     runs-on: ubuntu-latest
+    # Without an NVD API key the feed is rate limited to a crawl: the 14 September run spent 45 of
+    # its 48 minutes downloading CVE definitions. The cap keeps a bad day from burning an hour.
+    timeout-minutes: 30
+    env:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    permissions:
+      contents: read
+      # Publishing SARIF to the Security tab is a write, and the default token is read-only.
+      security-events: write
 
     steps:
     - name: Checkout code
@@ -31,38 +41,74 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
 
-    - name: Run OWASP Dependency Check
-      # Without a key the NVD feed is rate limited to a crawl and the scan runs for hours. Set
-      # NVD_API_KEY in the repository secrets; the plugin reads it from the environment.
-      env:
-        NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+    - name: Say what is missing
+      if: env.NVD_API_KEY == ''
       run: |
-        mvn org.owasp:dependency-check-maven:check -DnvdApiKey="${NVD_API_KEY}"
+        echo "::warning title=No NVD API key::The scan is skipped. Request a free key at" \
+             "https://nvd.nist.gov/developers/request-an-api-key and add it as the NVD_API_KEY" \
+             "secret. Without it the NVD feed is rate limited to roughly 45 minutes of downloads" \
+             "per run, which is why this job used to run for the best part of an hour."
+
+    # The CVE database, kept apart from the dependency cache so a pom change does not discard it.
+    # restore-keys means last week's copy is reused and only the delta is fetched.
+    - name: Cache the NVD database
+      if: env.NVD_API_KEY != ''
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository/org/owasp/dependency-check-data
+        key: nvd-${{ github.run_id }}
+        restore-keys: nvd-
+
+    - name: Run OWASP Dependency Check
+      # Skipped without a key rather than left to crawl. A weekly scan that takes 45 minutes to
+      # read a feed everyone else reads in seconds is not a scan worth waiting for.
+      if: env.NVD_API_KEY != ''
+      run: |
+        # The modules must be in the local repository first: invoking the plugin goal directly
+        # does not build the reactor, so verifnow-spring cannot resolve verifnow-core at a version
+        # that is not published yet — every scan between a version bump and its release failed.
+        mvn -B -ntp -DskipTests install
+        # nvdApiKeyEnvironmentVariable is the plugin's recommended way to pass the key in CI: it
+        # never reaches the command line, where it would show up in process listings.
+        # nvdValidForHours 168 keeps the restored cache from being re-downloaded every Monday.
+        mvn -B -ntp org.owasp:dependency-check-maven:check \
+          -DnvdApiKeyEnvironmentVariable=NVD_API_KEY \
+          -DnvdValidForHours=168
 
     - name: Upload dependency check results
       uses: actions/upload-artifact@v4
-      if: always()
+      if: always() && hashFiles('target/dependency-check-report.html') != ''
       with:
         name: dependency-check-report
         path: target/dependency-check-report.html
 
     - name: Run Snyk to check for vulnerabilities
+      # Skipped without a token: the action pulls a container image and fails on authentication,
+      # which is noise rather than a security finding.
+      if: env.SNYK_TOKEN != ''
       uses: snyk/actions/maven@master
       continue-on-error: true
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         args: --severity-threshold=high
 
     - name: Upload Snyk results
-      uses: github/codeql-action/upload-sarif@v2
-      if: always()
+      # Only when Snyk actually produced a report. It is skipped whenever SNYK_TOKEN is unset, and
+      # the upload then failed the whole job looking for a file that was never written.
+      # v3: v1 and v2 of the CodeQL action are deprecated and log an error of their own.
+      uses: github/codeql-action/upload-sarif@v3
+      if: always() && hashFiles('snyk.sarif') != ''
       with:
         sarif_file: snyk.sarif
 
   dependency-update:
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
+    # The default token is read-only, so pushing the branch was denied with a 403 and no PR was
+    # ever opened. The repository must also allow Actions to create pull requests
+    # (Settings > Actions > General), which no workflow file can grant.
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
     - name: Checkout code
