@@ -25,6 +25,7 @@ public class ValidationResult {
   private VatDetails vatDetails;
   private PhoneDetails phoneDetails;
   private IbanDetails ibanDetails;
+  private NasDetails nasDetails;
 
   public ValidationResult() {}
 
@@ -121,5 +122,18 @@ public class ValidationResult {
 
   public void setIbanDetails(IbanDetails ibanDetails) {
     this.ibanDetails = ibanDetails;
+  }
+
+  /**
+   * Canadian SIN diagnostics, present on {@code nas} validations.
+   *
+   * @since 2.4.0
+   */
+  public NasDetails getNasDetails() {
+    return nasDetails;
+  }
+
+  public void setNasDetails(NasDetails nasDetails) {
+    this.nasDetails = nasDetails;
   }
 }

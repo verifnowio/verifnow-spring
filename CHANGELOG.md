@@ -6,6 +6,15 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.4.0] - 2026-09-18
+### Added
+- **`NasDetails`** on `ValidationResult#getNasDetails()`: `checksumValid`, `temporaryResident`,
+  `individualSeries` and `formatted`. A 9-series SIN belongs to a temporary resident and expires with
+  their permit; numbers starting with 0 or 8 are not issued to individuals. Both are reported, not
+  rejected.
+
+---
+
 ## [2.3.0] - 2026-09-16
 ### Added
 - **`IbanDetails`** on `ValidationResult#getIbanDetails()`: `countryCode`, `structureValid`,

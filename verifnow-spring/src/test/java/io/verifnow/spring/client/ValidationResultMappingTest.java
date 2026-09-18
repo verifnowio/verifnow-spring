@@ -117,6 +117,20 @@ class ValidationResultMappingTest {
   }
 
   @Test
+  void mapsNasDetails() {
+    ValidationResult result = respond("nas", """
+        {"valid":true,"normalizedValue":"046454286","originalValue":"046 454 286",
+         "nasDetails":{"checksum_valid":true,"temporary_resident":false,
+           "individual_series":false,"formatted":"046 454 286"}}""");
+
+    var nas = result.getNasDetails();
+    assertThat(nas.checksumValid()).isTrue();
+    assertThat(nas.temporaryResident()).isFalse();
+    assertThat(nas.individualSeries()).isFalse();
+    assertThat(nas.formatted()).isEqualTo("046 454 286");
+  }
+
+  @Test
   void mapsPhoneDetails() {
     ValidationResult result = respond("phone", """
         {"valid":true,"normalizedValue":"+33612345678","originalValue":"+33 6 12 34 56 78",
