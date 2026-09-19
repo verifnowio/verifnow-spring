@@ -26,6 +26,7 @@ public class ValidationResult {
   private PhoneDetails phoneDetails;
   private IbanDetails ibanDetails;
   private NasDetails nasDetails;
+  private NifDetails nifDetails;
 
   public ValidationResult() {}
 
@@ -135,5 +136,18 @@ public class ValidationResult {
 
   public void setNasDetails(NasDetails nasDetails) {
     this.nasDetails = nasDetails;
+  }
+
+  /**
+   * Spanish NIF diagnostics, present on {@code nif} validations.
+   *
+   * @since 2.5.0
+   */
+  public NifDetails getNifDetails() {
+    return nifDetails;
+  }
+
+  public void setNifDetails(NifDetails nifDetails) {
+    this.nifDetails = nifDetails;
   }
 }

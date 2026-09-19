@@ -117,6 +117,21 @@ class ValidationResultMappingTest {
   }
 
   @Test
+  void mapsNifDetails() {
+    ValidationResult result = respond("nif", """
+        {"valid":true,"normalizedValue":"B12345674","originalValue":"B-12345674",
+         "nifDetails":{"type":"ENTITY","natural_person":false,"checksum_valid":true,
+           "entity_letter":"B","entity_type":"Private limited company (Sociedad de responsabilidad limitada)"}}""");
+
+    var nif = result.getNifDetails();
+    assertThat(nif.type()).isEqualTo("ENTITY");
+    assertThat(nif.naturalPerson()).isFalse();
+    assertThat(nif.checksumValid()).isTrue();
+    assertThat(nif.entityLetter()).isEqualTo("B");
+    assertThat(nif.entityType()).startsWith("Private limited company");
+  }
+
+  @Test
   void mapsNasDetails() {
     ValidationResult result = respond("nas", """
         {"valid":true,"normalizedValue":"046454286","originalValue":"046 454 286",

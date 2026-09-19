@@ -6,6 +6,14 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.5.0] - 2026-09-19
+### Added
+- **`NifDetails`** on `ValidationResult#getNifDetails()`: `type`, `naturalPerson`, `checksumValid`,
+  `entityLetter` and `entityType`. The API now accepts a foreign national's NIE and the NIF of a
+  company or other entity, not only a DNI, and says which it received.
+
+---
+
 ## [2.4.0] - 2026-09-18
 ### Added
 - **`NasDetails`** on `ValidationResult#getNasDetails()`: `checksumValid`, `temporaryResident`,
