@@ -117,6 +117,15 @@ class ValidationResultMappingTest {
   }
 
   @Test
+  void mapsSsnDetails() {
+    ValidationResult result = respond("ssn", """
+        {"valid":false,"message":"That is an ITIN, not an SSN","ssnDetails":{"itin":true}}""");
+
+    assertThat(result.isValid()).isFalse();
+    assertThat(result.getSsnDetails().itin()).isTrue();
+  }
+
+  @Test
   void mapsNifDetails() {
     ValidationResult result = respond("nif", """
         {"valid":true,"normalizedValue":"B12345674","originalValue":"B-12345674",

@@ -27,6 +27,7 @@ public class ValidationResult {
   private IbanDetails ibanDetails;
   private NasDetails nasDetails;
   private NifDetails nifDetails;
+  private SsnDetails ssnDetails;
 
   public ValidationResult() {}
 
@@ -149,5 +150,18 @@ public class ValidationResult {
 
   public void setNifDetails(NifDetails nifDetails) {
     this.nifDetails = nifDetails;
+  }
+
+  /**
+   * US SSN diagnostics, present on {@code ssn} validations.
+   *
+   * @since 2.6.0
+   */
+  public SsnDetails getSsnDetails() {
+    return ssnDetails;
+  }
+
+  public void setSsnDetails(SsnDetails ssnDetails) {
+    this.ssnDetails = ssnDetails;
   }
 }

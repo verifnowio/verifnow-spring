@@ -6,6 +6,14 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.6.0] - 2026-09-19
+### Added
+- **`SsnDetails`** on `ValidationResult#getSsnDetails()`, with `itin`. The API now names an IRS ITIN
+  instead of reporting it as an invalid combination, and says which SSA rule a rejected number
+  broke.
+
+---
+
 ## [2.5.0] - 2026-09-19
 ### Added
 - **`NifDetails`** on `ValidationResult#getNifDetails()`: `type`, `naturalPerson`, `checksumValid`,
