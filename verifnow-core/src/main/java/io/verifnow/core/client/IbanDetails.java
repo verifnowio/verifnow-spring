@@ -27,9 +27,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * the mod-97 check digits. Valid check digits on an impossible length is a real case, and the one
  * a payment form must not accept.
  *
+ * <p>{@code sepa} answers the question a checkout asks: could this account be collected from under
+ * a SEPA direct debit mandate? A structurally perfect Egyptian IBAN cannot, and no amount of
+ * checksum arithmetic says so. It reports the country's membership of the schemes' geographical
+ * scope, not the account bank's own adherence, which is published per bank.
+ *
  * <p>No bank name or BIC: that needs a bank registry the API does not hold.
  *
  * @param countryCode    the IBAN's country, from its first two characters
+ * @param sepa           the country is inside the SEPA schemes' geographical scope
  * @param structureValid length and character layout match the registry entry for that country
  * @param checksumValid  the mod-97 check digits are correct
  * @param length         length of the value as submitted, spaces removed
@@ -40,6 +46,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record IbanDetails(
     @JsonProperty("country_code") String countryCode,
+    @JsonProperty("sepa") boolean sepa,
     @JsonProperty("structure_valid") boolean structureValid,
     @JsonProperty("checksum_valid") boolean checksumValid,
     @JsonProperty("length") int length,

@@ -103,8 +103,8 @@ class ValidationResultMappingTest {
     ValidationResult result = respond("iban", """
         {"valid":false,"message":"A FR IBAN is 27 characters long",
          "originalValue":"FR23111111111111111111111","validationLevel":"STANDARD",
-         "ibanDetails":{"country_code":"FR","structure_valid":false,"checksum_valid":true,
-           "length":25,"expected_length":27}}""");
+         "ibanDetails":{"country_code":"FR","sepa":true,"structure_valid":false,
+           "checksum_valid":true,"length":25,"expected_length":27}}""");
 
     var iban = result.getIbanDetails();
     assertThat(result.isValid()).isFalse();
@@ -114,6 +114,19 @@ class ValidationResultMappingTest {
     assertThat(iban.length()).isEqualTo(25);
     assertThat(iban.expectedLength()).isEqualTo(27);
     assertThat(iban.formatted()).isNull();
+    assertThat(iban.sepa()).isTrue();
+  }
+
+  @Test
+  void anIbanOutsideSepaStaysValid() {
+    // The checkout case: the number is correct, and a SEPA mandate against it could only fail.
+    ValidationResult result = respond("iban", """
+        {"valid":true,"message":"Valid IBAN","normalizedValue":"EG800000000000000000000000000",
+         "ibanDetails":{"country_code":"EG","sepa":false,"structure_valid":true,
+           "checksum_valid":true,"length":29,"expected_length":29}}""");
+
+    assertThat(result.isValid()).isTrue();
+    assertThat(result.getIbanDetails().sepa()).isFalse();
   }
 
   @Test

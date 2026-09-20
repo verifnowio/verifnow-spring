@@ -26,6 +26,21 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * Validates an IBAN against the SWIFT registry structure for its country and its mod-97 check
+ * digits.
+ *
+ * <p>Set {@link #requireSepa()} on a field that will be direct-debited: an IBAN from outside the
+ * SEPA schemes' geographical scope is a correct IBAN that no SEPA mandate can collect from, and a
+ * checkout would rather say so than take the order.
+ *
+ * <pre>{@code
+ * public record CheckoutForm(
+ *     @VerifNowIban(requireSepa = true) String iban,
+ *     @VerifNowVat(requireRegistered = true) String vatNumber) {
+ * }
+ * }</pre>
+ */
 @Documented
 @Constraint(validatedBy = VerifNowIbanValidator.class)
 @Target({ FIELD, PARAMETER })
@@ -36,4 +51,14 @@ public @interface VerifNowIban {
   Class<? extends Payload>[] payload() default {};
   String profile() default "";
   boolean allowNull() default true;
+
+  /**
+   * Reject a valid IBAN whose country is outside the SEPA schemes' geographical scope.
+   *
+   * <p>Off by default: an IBAN outside SEPA is perfectly payable by transfer, and only a direct
+   * debit needs the account to be reachable under a mandate.
+   *
+   * @since 2.7.0
+   */
+  boolean requireSepa() default false;
 }

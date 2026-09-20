@@ -6,6 +6,17 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.7.0] - 2026-09-20
+### Added
+- **`IbanDetails#sepa()`**, which says whether the IBAN's country is inside the SEPA schemes'
+  geographical scope. A structurally perfect Egyptian IBAN is valid and cannot be collected under a
+  SEPA direct debit mandate; `valid` stays a fact about the number.
+- **`@VerifNowIban(requireSepa = true)`**, which rejects such a number on a field you will
+  direct-debit, with its own message naming the country. Off by default, since an IBAN outside SEPA
+  is perfectly payable by transfer.
+
+---
+
 ## [2.6.0] - 2026-09-19
 ### Added
 - **`SsnDetails`** on `ValidationResult#getSsnDetails()`, with `itin`. The API now names an IRS ITIN

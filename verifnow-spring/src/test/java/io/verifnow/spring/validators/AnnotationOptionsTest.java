@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.verifnow.core.client.EmailDetails;
 import io.verifnow.core.client.EmailSignals;
+import io.verifnow.core.client.IbanDetails;
 import io.verifnow.core.client.PhoneDetails;
 import io.verifnow.core.client.PhoneLineType;
 import io.verifnow.core.client.ValidationResult;
@@ -26,6 +27,7 @@ import io.verifnow.core.client.VatDetails;
 import io.verifnow.core.client.VatSource;
 import io.verifnow.core.client.VerifNowClient;
 import io.verifnow.spring.annotations.VerifNowEmail;
+import io.verifnow.spring.annotations.VerifNowIban;
 import io.verifnow.spring.annotations.VerifNowPhone;
 import io.verifnow.spring.annotations.VerifNowVat;
 import jakarta.validation.ConstraintValidator;
@@ -61,6 +63,7 @@ class AnnotationOptionsTest {
         if (key == VerifNowVatValidator.class) return (T) new VerifNowVatValidator(client);
         if (key == VerifNowPhoneValidator.class) return (T) new VerifNowPhoneValidator(client);
         if (key == VerifNowEmailValidator.class) return (T) new VerifNowEmailValidator(client);
+        if (key == VerifNowIbanValidator.class) return (T) new VerifNowIbanValidator(client);
         throw new IllegalArgumentException(key.getName());
       }
 
@@ -114,6 +117,42 @@ class AnnotationOptionsTest {
     Validator validator = validatorAnswering(vat(true, VatSource.STALE));
 
     assertThat(validator.validate(new StrictVat("FR12345678901"))).isEmpty();
+  }
+
+  private static ValidationResult iban(String countryCode, boolean sepa) {
+    // The constructor takes (valid, originalValue, message) — the order the phone helper uses.
+    ValidationResult r = new ValidationResult(true, countryCode + "00", "Valid IBAN");
+    r.setIbanDetails(new IbanDetails(countryCode, sepa, true, true, 29, 29, null));
+    return r;
+  }
+
+  record AnyIban(@VerifNowIban String iban) {}
+
+  record DirectDebitIban(@VerifNowIban(requireSepa = true) String iban) {}
+
+  @Test
+  void iban_anyValidIbanIsAcceptedByDefault() {
+    // Paying by transfer from Egypt is not a problem, so the default must not reject it.
+    Validator validator = validatorAnswering(iban("EG", false));
+
+    assertThat(validator.validate(new AnyIban("EG800000000000000000000000000"))).isEmpty();
+  }
+
+  @Test
+  void iban_requireSepaRejectsAValidIbanOutsideTheArea() {
+    Validator validator = validatorAnswering(iban("EG", false));
+
+    assertThat(messages(validator.validate(new DirectDebitIban("EG800000000000000000000000000"))))
+        .containsExactly("This account is in EG, outside the SEPA area, "
+            + "so it cannot be charged by direct debit");
+  }
+
+  @Test
+  void iban_requireSepaAcceptsAnIbanInsideTheArea() {
+    // Including the ones a hand-written list forgets: the UK stayed in SEPA after Brexit.
+    Validator validator = validatorAnswering(iban("GB", true));
+
+    assertThat(validator.validate(new DirectDebitIban("GB82WEST12345698765432"))).isEmpty();
   }
 
   private static ValidationResult phone(PhoneLineType type) {

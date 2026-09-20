@@ -68,14 +68,14 @@ Notes:
 <dependency>
     <groupId>io.verifnow</groupId>
     <artifactId>verifnow-spring-boot-starter</artifactId>
-    <version>2.6.0</version>
+    <version>2.7.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation 'io.verifnow:verifnow-spring-boot-starter:2.6.0'
+implementation 'io.verifnow:verifnow-spring-boot-starter:2.7.0'
 ```
 
 ---
@@ -159,6 +159,11 @@ public class B2bSignup {
     // contact@ and info@ are accepted unless rejectRoleBased = true.
     @VerifNowEmail(rejectDisposable = true)
     private String email;
+
+    // Since 2.7.0: a correct Egyptian IBAN is valid, and cannot be direct-debited. Only a field
+    // you will collect from needs this; a transfer works from anywhere.
+    @VerifNowIban(requireSepa = true)
+    private String iban;
 }
 ```
 
@@ -168,6 +173,7 @@ public class B2bSignup {
 | `@VerifNowPhone` | `rejectedLineTypes` | `{}` | Reject valid numbers of these types, e.g. `PREMIUM_RATE`. |
 | `@VerifNowEmail` | `rejectDisposable` | `false` | Reject disposable mailbox providers. |
 | `@VerifNowEmail` | `rejectRoleBased` | `false` | Reject shared mailboxes such as `info@`, `contact@`. |
+| `@VerifNowIban` | `requireSepa` | `false` | Reject a valid IBAN from outside the SEPA area, which no direct debit mandate can collect from. Leave off for a field paid by transfer. *(2.7.0)* |
 
 ### Reading the diagnostics
 
