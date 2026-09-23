@@ -68,14 +68,14 @@ Notes:
 <dependency>
     <groupId>io.verifnow</groupId>
     <artifactId>verifnow-spring-boot-starter</artifactId>
-    <version>2.7.0</version>
+    <version>2.8.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation 'io.verifnow:verifnow-spring-boot-starter:2.7.0'
+implementation 'io.verifnow:verifnow-spring-boot-starter:2.8.0'
 ```
 
 ---
@@ -193,6 +193,33 @@ phone.getPhoneDetails().lineType();            // MOBILE
 EmailSignals signals = client.validate("email", "someone@gmail.com").getEmailDetails().getSignals();
 signals.freeProviderIfComputed();              // Optional.empty() on FREE and STARTER
 ```
+
+### VAT rates (2.8.0)
+
+The rates of the 27 member states, retrieved daily from the Commission's
+[TEDB](https://ec.europa.eu/taxation_customs/tedb/). Public reference data: these calls spend no
+quota.
+
+```java
+CountryVatRates france = client.vatRate("FR");   // "GR" is accepted for Greece (EL)
+france.standardRate();     // 20
+france.reducedRates();     // [2.1, 5.5, 10] — which one applies depends on the product
+france.regionalRates();    // [RegionalVatRate[rate=8.5, note=The standard VAT rate in Martinique…], …]
+france.situationOn();      // 2026-07-01 — the date TEDB says these rates apply from
+
+VatRates all = client.vatRates();                // all.rates(): one entry per member state
+```
+
+**These are the rates a member state has, not the rate an invoice carries.** In B2B trade between
+member states the invoice is usually zero-rated under the reverse charge, whatever the buyer's
+country rate is.
+
+Unlike `validate`, the rate calls **never fail open**, whatever `failOnError` says: accepting a
+value unverified is a policy you can choose, but returning a rate that was not read would be an
+invented one. A country outside the union throws `WebClientResponseException.NotFound`.
+
+`vatRates()` and `vatRate()` are `default` methods on `VerifNowClient`, so a class of your own
+that implements the interface still compiles; it throws `UnsupportedOperationException` if called.
 
 ### Error messages
 

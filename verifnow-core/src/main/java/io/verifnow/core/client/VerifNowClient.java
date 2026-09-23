@@ -23,4 +23,29 @@ public interface VerifNowClient {
 
   CompletableFuture<ValidationResult> validateAsync(String rule, String value);
 
+  /**
+   * EU VAT rates of every member state, from the European Commission's TEDB.
+   *
+   * <p>Public reference data: the call spends no quota. These are the rates a member state has, not
+   * the rate an invoice carries — see {@link CountryVatRates}.
+   *
+   * <p>A default method so that adding it breaks no existing implementation of this interface; the
+   * SDK's own client overrides it.
+   *
+   * @since 2.8.0
+   */
+  default VatRates vatRates() {
+    throw new UnsupportedOperationException(getClass().getName() + " does not read VAT rates");
+  }
+
+  /**
+   * One EU member state's VAT rates. Accepts {@code GR} for Greece as well as {@code EL}.
+   *
+   * @param countryCode a member state code, e.g. {@code FR}
+   * @since 2.8.0
+   */
+  default CountryVatRates vatRate(String countryCode) {
+    throw new UnsupportedOperationException(getClass().getName() + " does not read VAT rates");
+  }
+
 }

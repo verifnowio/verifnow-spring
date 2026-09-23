@@ -6,6 +6,20 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.8.0] - 2026-09-23
+### Added
+- **`VerifNowClient#vatRates()`** and **`#vatRate(String)`**, reading the EU VAT rates the API now
+  publishes from the Commission's TEDB: standard, reduced and regional rates of the 27 member
+  states, with the date they apply from. No quota is spent. `GR` is accepted for Greece.
+- `CountryVatRates`, `RegionalVatRate` and `VatRates`.
+
+### Compatibility
+- Both methods are `default` methods, so an existing implementation of `VerifNowClient` still
+  compiles; it throws `UnsupportedOperationException` if they are called.
+- They never fail open, whatever `failOnError` says: there is no safe default for a tax rate.
+
+---
+
 ## [2.7.0] - 2026-09-20
 ### Added
 - **`IbanDetails#sepa()`**, which says whether the IBAN's country is inside the SEPA schemes'

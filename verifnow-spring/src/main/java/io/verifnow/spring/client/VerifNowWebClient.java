@@ -15,6 +15,8 @@
  */
 package io.verifnow.spring.client;
 
+import io.verifnow.core.client.CountryVatRates;
+import io.verifnow.core.client.VatRates;
 import io.verifnow.core.client.VerifNowClient;
 import io.verifnow.core.client.ValidationResult;
 import io.verifnow.spring.config.ValidationProperties;
@@ -37,6 +39,9 @@ public class VerifNowWebClient implements VerifNowClient {
 
   /** Path both the blocking and the async call must use. */
   private static final String VALIDATE_PATH = "/api/v1/validate/{rule}";
+
+  private static final String VAT_RATES_PATH = "/api/v1/vat/rates";
+  private static final String VAT_RATE_PATH = "/api/v1/vat/rates/{countryCode}";
 
   private final WebClient webClient;
   private final ValidationProperties props;
@@ -88,6 +93,46 @@ public class VerifNowWebClient implements VerifNowClient {
   @Override
   public CompletableFuture<ValidationResult> validateAsync(String rule, String value) {
     return requestValidation(rule, value).toFuture();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>{@code failOnError} does not apply here, deliberately. Failing open on a validation accepts a
+   * value unverified; failing open on a rate would have to invent one, and there is no safe default
+   * for a tax rate. A transport error or an HTTP error is thrown.
+   */
+  @Override
+  public VatRates vatRates() {
+    return webClient.get()
+        .uri(VAT_RATES_PATH)
+        .accept(MediaType.APPLICATION_JSON)
+        .retrieve()
+        .bodyToMono(VatRates.class)
+        .timeout(Duration.ofMillis(props.getTimeoutMs()))
+        .block();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>A code outside the 27 member states is answered 404 and thrown as a
+   * {@link WebClientResponseException.NotFound}. Like {@link #vatRates()}, this never fails open.
+   *
+   * @throws IllegalArgumentException if the code is blank
+   */
+  @Override
+  public CountryVatRates vatRate(String countryCode) {
+    if (countryCode == null || countryCode.isBlank()) {
+      throw new IllegalArgumentException("A member state code is required, e.g. \"FR\"");
+    }
+    return webClient.get()
+        .uri(uriBuilder -> uriBuilder.path(VAT_RATE_PATH).build(countryCode.trim()))
+        .accept(MediaType.APPLICATION_JSON)
+        .retrieve()
+        .bodyToMono(CountryVatRates.class)
+        .timeout(Duration.ofMillis(props.getTimeoutMs()))
+        .block();
   }
 
   private Mono<ValidationResult> requestValidation(String rule, String value) {
