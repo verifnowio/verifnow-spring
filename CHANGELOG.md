@@ -6,6 +6,22 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.9.0] - 2026-09-24
+### Added
+- **`VerifNowClient#validateVat(String value, String traderName)`** — validates a VAT number and
+  says whether it belongs to that company: `VatDetails#traderNameMatch()` (`MATCH`, `MISMATCH`,
+  `NOT_AVAILABLE`) and `#traderNameMatchSource()` (`VERIFNOW`, `VIES`). Spain is checked by VIES;
+  most other member states by VerifNow against the name VIES publishes; Germany is `NOT_AVAILABLE`.
+- **`RegionalVatRate#euVatArea()`** — `false` for the Canary Islands and the French overseas
+  territories, which the VAT Directive excludes (Article 6(1)).
+- `TraderNameMatch` and `TraderNameMatchSource`, both reading an unknown value as `null`.
+
+### Compatibility
+- `validateVat(String, String)` is a `default` method: existing implementations still compile.
+- `VatDetails` and `RegionalVatRate` keep their 2.8.0 constructors alongside the new components.
+
+---
+
 ## [2.8.0] - 2026-09-23
 ### Added
 - **`VerifNowClient#vatRates()`** and **`#vatRate(String)`**, reading the EU VAT rates the API now

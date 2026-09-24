@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.verifnow.core.client.CountryVatRates;
 import io.verifnow.core.client.RegionalVatRate;
+import io.verifnow.core.client.TraderNameMatch;
+import io.verifnow.core.client.TraderNameMatchSource;
 import io.verifnow.core.client.ValidationResult;
 import io.verifnow.core.client.VatRates;
 import io.verifnow.core.client.VerifNowClient;
@@ -218,6 +220,62 @@ class VerifNowWebClientTest {
   }
 
   @Test
+  void validateVat_sendsTheTraderNameAndReadsTheMatch() throws Exception {
+    server.enqueue(jsonResponse("""
+        {"valid":true,"message":"Valid VAT number","normalizedValue":"ESA28015865",
+         "vatDetails":{"format_valid":true,"registered":true,"country_code":"ES","source":"LIVE",
+           "vies_available":true,"trader_name_match":"MATCH","trader_name_match_source":"VIES"}}"""));
+
+    ValidationResult result = clientFor(propsPointingAtServer())
+        .validateVat("ESA28015865", "Telefonica");
+
+    RecordedRequest request = server.takeRequest(2, TimeUnit.SECONDS);
+    assertThat(request).isNotNull();
+    assertThat(request.getPath()).isEqualTo("/api/v1/validate/vat");
+    assertThat(request.getBody().readUtf8())
+        .isEqualTo("{\"value\":\"ESA28015865\",\"traderName\":\"Telefonica\"}");
+    assertThat(result.getVatDetails().traderNameMatch()).isEqualTo(TraderNameMatch.MATCH);
+    assertThat(result.getVatDetails().traderNameMatchSource())
+        .isEqualTo(TraderNameMatchSource.VIES);
+  }
+
+  @Test
+  void validateVat_omitsABlankTraderName() throws Exception {
+    server.enqueue(jsonResponse(VALID_BODY));
+
+    clientFor(propsPointingAtServer()).validateVat("IE6388047V", "  ");
+
+    RecordedRequest request = server.takeRequest(2, TimeUnit.SECONDS);
+    assertThat(request).isNotNull();
+    assertThat(request.getBody().readUtf8()).isEqualTo("{\"value\":\"IE6388047V\"}");
+  }
+
+  @Test
+  void validateVat_anUnknownMatchValueIsNullNotAnError() {
+    server.enqueue(jsonResponse("""
+        {"valid":true,"vatDetails":{"format_valid":true,"registered":true,
+          "trader_name_match":"SOMETHING_NEW","vies_available":true}}"""));
+
+    ValidationResult result = clientFor(propsPointingAtServer()).validateVat("IE6388047V", "X");
+
+    assertThat(result.getVatDetails().traderNameMatch()).isNull();
+  }
+
+  @Test
+  void vatRate_readsEuVatAreaOnRegionalRates() {
+    server.enqueue(jsonResponse("""
+        {"countryCode":"FR","standardRate":20,"reducedRates":[2.1,5.5,10],
+         "regionalRates":[{"rate":0.9,"note":"For Corsica","euVatArea":true},
+                          {"rate":8.5,"note":"Martinique, Guadeloupe and Réunion","euVatArea":false}],
+         "situationOn":"2026-07-01"}"""));
+
+    CountryVatRates france = clientFor(propsPointingAtServer()).vatRate("FR");
+
+    assertThat(france.regionalRates()).extracting(RegionalVatRate::euVatArea)
+        .containsExactly(true, false);
+  }
+
+  @Test
   void anExistingImplementationOfTheInterfaceStillCompilesAndSaysWhatItLacks() {
     // Written against 2.7.0: only the two validation methods. The rate methods are defaults, so
     // this still compiles in 2.8.0 — and says plainly that it does not read rates.
@@ -235,6 +293,8 @@ class VerifNowWebClientTest {
     };
 
     assertThatThrownBy(legacy::vatRates).isInstanceOf(UnsupportedOperationException.class);
+    assertThatThrownBy(() -> legacy.validateVat("IE6388047V", "Google Ireland Ltd"))
+        .isInstanceOf(UnsupportedOperationException.class);
     assertThatThrownBy(() -> legacy.vatRate("FR"))
         .isInstanceOf(UnsupportedOperationException.class);
   }

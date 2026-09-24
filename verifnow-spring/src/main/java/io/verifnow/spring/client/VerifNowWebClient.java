@@ -64,9 +64,24 @@ public class VerifNowWebClient implements VerifNowClient {
 
   @Override
   public ValidationResult validate(String rule, String value) {
+    return blockingValidation(rule, requestValidation(rule, new RequestPayload(value)));
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Goes through the same error handling as {@link #validate}: {@code failOnError} decides
+   * whether an unreachable API throws or accepts the value unverified — with no name comparison.
+   */
+  @Override
+  public ValidationResult validateVat(String value, String traderName) {
+    return blockingValidation("vat", requestValidation("vat", new VatRequestPayload(value, traderName)));
+  }
+
+  private ValidationResult blockingValidation(String rule, Mono<ValidationResult> call) {
     try {
       // Blocking because ConstraintValidator.isValid is synchronous
-      return requestValidation(rule, value).block();
+      return call.block();
     } catch (WebClientResponseException wex) {
       throw wex;
     } catch (Exception ex) {
@@ -92,7 +107,7 @@ public class VerifNowWebClient implements VerifNowClient {
 
   @Override
   public CompletableFuture<ValidationResult> validateAsync(String rule, String value) {
-    return requestValidation(rule, value).toFuture();
+    return requestValidation(rule, new RequestPayload(value)).toFuture();
   }
 
   /**
@@ -135,15 +150,36 @@ public class VerifNowWebClient implements VerifNowClient {
         .block();
   }
 
-  private Mono<ValidationResult> requestValidation(String rule, String value) {
+  private Mono<ValidationResult> requestValidation(String rule, Object payload) {
     return webClient.post()
         .uri(uriBuilder -> uriBuilder.path(VALIDATE_PATH).build(rule))
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .bodyValue(new RequestPayload(value))
+        .bodyValue(payload)
         .retrieve()
         .bodyToMono(ValidationResult.class)
         .timeout(Duration.ofMillis(props.getTimeoutMs()));
+  }
+
+  /** The VAT body: the number, and the name to check it against when there is one. */
+  @com.fasterxml.jackson.annotation.JsonInclude(
+      com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+  private static class VatRequestPayload {
+    private final String value;
+    private final String traderName;
+
+    VatRequestPayload(String value, String traderName) {
+      this.value = value;
+      this.traderName = traderName == null || traderName.isBlank() ? null : traderName;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    public String getTraderName() {
+      return traderName;
+    }
   }
 
   private static class RequestPayload {

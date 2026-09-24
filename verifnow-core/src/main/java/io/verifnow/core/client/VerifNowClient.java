@@ -24,6 +24,23 @@ public interface VerifNowClient {
   CompletableFuture<ValidationResult> validateAsync(String rule, String value);
 
   /**
+   * Validates a VAT number and checks whether it belongs to the named company.
+   *
+   * <p>{@link VatDetails#traderNameMatch()} answers {@code MATCH}, {@code MISMATCH} or
+   * {@code NOT_AVAILABLE}. Where VIES publishes the holder's name, VerifNow compares; Spain has VIES
+   * check a name it does not publish; Germany does neither.
+   *
+   * <p>A default method so that adding it breaks no existing implementation of this interface.
+   *
+   * @param value      the VAT number, with its country prefix
+   * @param traderName the company you expect to hold it; at most 200 characters
+   * @since 2.9.0
+   */
+  default ValidationResult validateVat(String value, String traderName) {
+    throw new UnsupportedOperationException(getClass().getName() + " does not check trader names");
+  }
+
+  /**
    * EU VAT rates of every member state, from the European Commission's TEDB.
    *
    * <p>Public reference data: the call spends no quota. These are the rates a member state has, not

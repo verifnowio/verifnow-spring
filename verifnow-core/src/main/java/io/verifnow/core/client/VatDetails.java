@@ -38,6 +38,10 @@ import java.time.Instant;
  * @param viesAvailable      whether VIES could answer for this country during the request
  * @param consultationNumber the receipt VIES issues to an identified requester — present only when
  *                           your VerifNow account has its own VAT number configured
+ * @param traderNameMatch    present when a trader name was sent: whether it belongs to the
+ *                           registered holder. Since 2.9.0.
+ * @param traderNameMatchSource who compared — {@code VERIFNOW} against the name VIES published, or
+ *                           {@code VIES} itself (Spain). Since 2.9.0.
  * @since 2.2.0
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -50,6 +54,16 @@ public record VatDetails(
     @JsonProperty("trader_name") String traderName,
     @JsonProperty("trader_address") String traderAddress,
     @JsonProperty("vies_available") boolean viesAvailable,
-    @JsonProperty("consultation_number") String consultationNumber
+    @JsonProperty("consultation_number") String consultationNumber,
+    @JsonProperty("trader_name_match") TraderNameMatch traderNameMatch,
+    @JsonProperty("trader_name_match_source") TraderNameMatchSource traderNameMatchSource
 ) {
+
+  /** The 2.8.0 shape, kept so code that built one — tests, typically — still compiles. */
+  public VatDetails(boolean formatValid, Boolean registered, String countryCode, VatSource source,
+      Instant checkedAt, String traderName, String traderAddress, boolean viesAvailable,
+      String consultationNumber) {
+    this(formatValid, registered, countryCode, source, checkedAt, traderName, traderAddress,
+        viesAvailable, consultationNumber, null, null);
+  }
 }

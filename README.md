@@ -68,14 +68,14 @@ Notes:
 <dependency>
     <groupId>io.verifnow</groupId>
     <artifactId>verifnow-spring-boot-starter</artifactId>
-    <version>2.8.0</version>
+    <version>2.9.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation 'io.verifnow:verifnow-spring-boot-starter:2.8.0'
+implementation 'io.verifnow:verifnow-spring-boot-starter:2.9.0'
 ```
 
 ---
@@ -194,6 +194,19 @@ EmailSignals signals = client.validate("email", "someone@gmail.com").getEmailDet
 signals.freeProviderIfComputed();              // Optional.empty() on FREE and STARTER
 ```
 
+### Does the VAT number belong to this company? (2.9.0)
+
+```java
+ValidationResult result = client.validateVat("ESA28015865", "Telefonica");
+result.getVatDetails().traderNameMatch();        // MATCH, MISMATCH or NOT_AVAILABLE
+result.getVatDetails().traderNameMatchSource();  // VERIFNOW or VIES
+```
+
+Where VIES publishes the holder's name (most member states), VerifNow compares, ignoring case,
+accents, punctuation and legal forms. Spain publishes no name but has VIES check one. Germany does
+neither: `NOT_AVAILABLE`, not a guess. A `MISMATCH` is a question for a human, not proof of fraud.
+`validateVat(String, String)` is a `default` method on `VerifNowClient`.
+
 ### VAT rates (2.8.0)
 
 The rates of the 27 member states, retrieved daily from the Commission's
@@ -204,7 +217,7 @@ quota.
 CountryVatRates france = client.vatRate("FR");   // "GR" is accepted for Greece (EL)
 france.standardRate();     // 20
 france.reducedRates();     // [2.1, 5.5, 10] — which one applies depends on the product
-france.regionalRates();    // [RegionalVatRate[rate=8.5, note=The standard VAT rate in Martinique…], …]
+france.regionalRates();    // [RegionalVatRate[rate=8.5, note=…Martinique…, euVatArea=false], …]
 france.situationOn();      // 2026-07-01 — the date TEDB says these rates apply from
 
 VatRates all = client.vatRates();                // all.rates(): one entry per member state
