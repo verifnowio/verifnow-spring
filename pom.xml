@@ -80,8 +80,8 @@
       these overrides protect this build, not necessarily the applications that depend on it.
       Drop them once Boot manages the patched versions itself.
     -->
-    <jackson-bom.version>2.21.5</jackson-bom.version>
-    <log4j2.version>2.25.5</log4j2.version>
+    <jackson-bom.version>2.22.4</jackson-bom.version>
+    <log4j2.version>3.0.0-beta3</log4j2.version>
     <license.owner>VerifNow</license.owner>
     <!-- NVD API key for OWASP dependency-check. Leave empty here. Provide the key in CI (as a secret) or locally via:
          - Passing a system property: mvn -Dnvd.api.key=YOUR_KEY verify

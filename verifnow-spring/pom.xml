@@ -55,7 +55,7 @@
     <dependency>
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
-      <version>3.0.2</version>
+      <version>4.0.0-M1</version>
     </dependency>
 
     <!-- Hibernate Validator – optional, used for parameterized constraint messages -->
@@ -86,7 +86,7 @@
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>mockwebserver</artifactId>
-      <version>4.12.0</version>
+      <version>5.5.1</version>
       <scope>test</scope>
     </dependency>
 
