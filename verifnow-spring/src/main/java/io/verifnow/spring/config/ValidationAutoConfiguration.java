@@ -16,6 +16,7 @@
 package io.verifnow.spring.config;
 
 import io.verifnow.spring.client.VerifNowWebClient;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -33,8 +34,17 @@ public class ValidationAutoConfiguration {
     return new ValidationProperties();
   }
 
+  /**
+   * Uses the application's {@link WebClient.Builder} when Spring Boot provides one, so its codecs,
+   * filters and observation settings apply, and a plain builder otherwise.
+   *
+   * <p>Spring Boot 4 moved the builder's auto-configuration out of the WebFlux starter into
+   * {@code spring-boot-webclient}. Requiring the bean made every Boot 4 application that did not
+   * also declare that module fail at startup.
+   */
   @Bean
-  public VerifNowWebClient verifNowClient(WebClient.Builder builder, ValidationProperties props) {
-    return new VerifNowWebClient(builder, props);
+  public VerifNowWebClient verifNowClient(ObjectProvider<WebClient.Builder> builderProvider,
+      ValidationProperties props) {
+    return new VerifNowWebClient(builderProvider.getIfAvailable(WebClient::builder), props);
   }
 }

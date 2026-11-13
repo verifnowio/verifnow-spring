@@ -68,14 +68,14 @@ Notes:
 <dependency>
     <groupId>io.verifnow</groupId>
     <artifactId>verifnow-spring-boot-starter</artifactId>
-    <version>2.9.0</version>
+    <version>2.9.1</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation 'io.verifnow:verifnow-spring-boot-starter:2.9.0'
+implementation 'io.verifnow:verifnow-spring-boot-starter:2.9.1'
 ```
 
 ---

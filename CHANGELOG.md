@@ -6,6 +6,20 @@ and this project follows **[Semantic Versioning](https://semver.org/)**.
 
 ---
 
+## [2.9.1] - 2026-11-13
+### Fixed
+- **The starter now works in Spring Boot 4 applications.** Up to 2.9.0, an application on Spring
+  Boot 4 failed at startup with `required a bean of type 'WebClient$Builder' that could not be
+  found`: Boot 4 moved that bean's auto-configuration out of the WebFlux starter. The SDK now uses
+  the application's `WebClient.Builder` when there is one and builds its own otherwise.
+
+### Compatibility
+- No API change. Spring Boot 3 applications keep using their own `WebClient.Builder`, as before.
+- Checked against the API with a Spring Boot 3.5.16 and a Spring Boot 4.1.2 application: both
+  decode the same results.
+
+---
+
 ## [2.9.0] - 2026-09-24
 ### Added
 - **`VerifNowClient#validateVat(String value, String traderName)`** — validates a VAT number and

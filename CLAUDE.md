@@ -3,7 +3,7 @@
 Guidance for Claude Code (claude.ai/code) when working in this repository.
 
 Published to **Maven Central** as `io.verifnow:verifnow-spring` (and siblings). Current version:
-`2.9.0`. The repository lives under the `verifnowio` GitHub organisation — an older, unrelated
+`2.9.1`. The repository lives under the `verifnowio` GitHub organisation — an older, unrelated
 `validation-spring` repo under the personal account is dead and must not be used.
 
 ## Modules
@@ -78,7 +78,10 @@ tagging.
 
 ## Conventions
 
-- Java 17+, Spring Boot 3.x (parent `3.5.16`).
+- Java 17+, Spring Boot 3.x (parent `3.5.16`). The starter must also run in a Spring Boot 4
+  application: never require a bean that only Boot 3 auto-configures. Boot 4 split
+  auto-configuration into modules, and `WebClient.Builder` is no longer provided by the WebFlux
+  starter (the 2.9.1 fix).
 - Every source file carries the license header (`LICENSE_HEADER`, enforced by `license-maven-plugin`).
 - Public API is a published contract: additive changes only, semver strictly. Someone else's build
   depends on this.
