@@ -338,6 +338,13 @@ mvn clean install
 mvn clean verify
 ```
 
+## Other SDKs
+
+- **Node.js / TypeScript**: [`@verifnow/sdk`](https://www.npmjs.com/package/@verifnow/sdk) — `npm install @verifnow/sdk`
+- **Python**: [`verifnow`](https://pypi.org/project/verifnow/) — `pip install verifnow`
+
+Documentation for all three: [docs.verifnow.io](https://docs.verifnow.io).
+
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
